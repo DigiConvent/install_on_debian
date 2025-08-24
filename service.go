@@ -29,7 +29,7 @@ func serviceFileContents(name string) string {
 	WantedBy=multi-user.target`
 }
 
-func InstallService(name string) (*installedService, error) {
+func (u *userAccount) InstallService(name string) (*installedService, error) {
 	// make sure that a service file is put into place
 	if _, err := os.Stat(servicePath(name)); err != nil {
 		err := os.WriteFile(servicePath(name), []byte(serviceFileContents(name)), 0644)
