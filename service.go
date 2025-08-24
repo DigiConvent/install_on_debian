@@ -29,45 +29,51 @@ func serviceFileContents(name string) string {
 	WantedBy=multi-user.target`
 }
 
-func (u *userAccount) InstallService(name string) (*installedService, error) {
+func (u *userAccount) InstallService() (*installedService, error) {
 	// make sure that a service file is put into place
-	if _, err := os.Stat(servicePath(name)); err != nil {
-		err := os.WriteFile(servicePath(name), []byte(serviceFileContents(name)), 0644)
+	if _, err := os.Stat(servicePath(*u.name)); err != nil {
+		err := os.WriteFile(servicePath(*u.name), []byte(serviceFileContents(*u.name)), 0644)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return &installedService{name: name}, nil
+	return &installedService{name: u.name}, nil
 }
 
 type installedService struct {
-	name string
+	name *string
 }
 
-func (i *installedService) Start(name string) (*startedService, error) {
+func (i *installedService) Start() (*startedService, error) {
 	for _, command := range []string{
 		"systemctl daemon-reload",
-		"systemctl enable" + name,
-		"systemctl start" + name} {
+		"systemctl enable" + *i.name,
+		"systemctl start" + *i.name} {
 		err := exec.Command("sudo", command).Run()
 		if err != nil {
 			return nil, err
 		}
 	}
-	return &startedService{name: name}, nil
+	return &startedService{name: i.name}, nil
 }
-func (i *installedService) UninstallService(name string) (*userAccount, error) {
-	err := os.Remove(servicePath(name))
+func (i *installedService) Uninstall() (*userAccount, error) {
+	err := os.Remove(servicePath(*i.name))
 	if err != nil {
 		return nil, err
 	}
-	return &userAccount{name: name}, nil
+	return &userAccount{name: i.name}, nil
 }
 
 type startedService struct {
-	name string
+	name *string
 }
 
-func (s *startedService) StopService() error {
-	return exec.Command("sudo", "systemctl stop"+s.name).Run()
+func (s *startedService) Stop() (*installedService, error) {
+	err := exec.Command("sudo", "systemctl stop"+*s.name).Run()
+	if err != nil {
+		return nil, err
+	}
+	return &installedService{
+		name: s.name,
+	}, nil
 }

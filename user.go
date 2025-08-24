@@ -7,7 +7,7 @@ import (
 )
 
 func (u *userAccount) Delete() error {
-	output, err := exec.Command("sudo", "userdel", "-r", u.name).Output()
+	output, err := exec.Command("sudo", "userdel", "-r", *u.name).Output()
 	if err != nil {
 		return errors.New(err.Error() + string(output))
 	}
@@ -15,7 +15,7 @@ func (u *userAccount) Delete() error {
 }
 
 type userAccount struct {
-	name string
+	name *string
 }
 
 // if the user already exists, nil is returned
@@ -28,5 +28,5 @@ func CreateUser(name string) (*userAccount, error) {
 		}
 	}
 
-	return &userAccount{name: name}, nil
+	return &userAccount{name: &name}, nil
 }
