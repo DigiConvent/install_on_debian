@@ -25,7 +25,7 @@ func TestSystemCtl(t *testing.T) {
 	defer Cleanup()
 	user, err := user.CreateOrGetUser(name)
 	if err != nil {
-		t.Fatal("Expected to create user for this step")
+		t.Fatal("Expected to create user for this step", err)
 	}
 	defer user.Delete()
 	sysCtl, err := systemctl.Get(name)

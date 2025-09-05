@@ -6,7 +6,6 @@ import (
 	"os/exec"
 
 	"github.com/DigiConvent/install_on_debian/user"
-	install_user_on_debian "github.com/DigiConvent/install_on_debian/user"
 	"github.com/DigiConvent/install_on_debian/utils"
 )
 
@@ -36,12 +35,12 @@ type IdleService interface {
 
 type SystemCtl struct {
 	serviceName string
-	User        *install_user_on_debian.OsUserAccount
+	User        *user.OsUserAccount
 	status      *ServiceStatus
 }
 
 func (s *SystemCtl) reload() error {
-	result, err := utils.Execute("daemon-reload")
+	result, err := utils.Execute("systemctl daemon-reload")
 	if err != nil {
 		return errors.New(result + err.Error())
 	}
@@ -78,7 +77,7 @@ func (s *SystemCtl) Install(unitFile string) (IdleService, error) {
 		return nil, errors.New("user does not exist")
 	}
 
-	if _, err := os.Stat(servicePath(s.serviceName)); err != nil {
+	if !utils.FileExists(servicePath(s.serviceName)) {
 		contents := unitFile
 		if contents == "" {
 			contents, err = serviceFileContents(s.serviceName)
@@ -91,6 +90,7 @@ func (s *SystemCtl) Install(unitFile string) (IdleService, error) {
 			return nil, err
 		}
 	}
+
 	s.refreshStatus()
 	err = s.reload()
 	if err != nil {
@@ -100,7 +100,7 @@ func (s *SystemCtl) Install(unitFile string) (IdleService, error) {
 }
 
 func (s *SystemCtl) Stop() (IdleService, error) {
-	_, err := utils.Execute("stop " + s.serviceName)
+	_, err := utils.Execute("systemctl stop " + s.serviceName)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (s *SystemCtl) Stop() (IdleService, error) {
 	return s, nil
 }
 func (s *SystemCtl) Start() (StartedService, error) {
-	_, err := utils.Execute("start " + s.serviceName)
+	_, err := utils.Execute("systemctl start " + s.serviceName)
 	if err != nil {
 		return nil, err
 	}

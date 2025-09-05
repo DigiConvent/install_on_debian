@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
 	"os/user"
@@ -26,9 +25,7 @@ func CreateOrGetUser(name string) (*OsUserAccount, error) {
 		}
 
 		if utils.FileExists(userAccount.sudoersFile()) {
-			fmt.Println("Sudoersfile already exists, deleting")
-			err := os.Remove(userAccount.sudoersFile())
-			fmt.Println(err)
+			os.Remove(userAccount.sudoersFile())
 		}
 
 		sctl := "/bin/systemctl"
@@ -59,6 +56,8 @@ func (u *OsUserAccount) sudoersFile() string {
 	return path.Join(sudoersFolder, *u.name)
 }
 
+// this function should not be used in a productive environment since it will delete
+// the users' home folder which is the home of all the data of an application
 func (u *OsUserAccount) Delete() error {
 	output, err := exec.Command("sudo", "userdel", "-r", *u.name).Output()
 	if err != nil {

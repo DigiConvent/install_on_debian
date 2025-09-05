@@ -17,10 +17,17 @@ import (
 var name string = "binary_tests"
 
 func TestHardLink(t *testing.T) {
-	_, err := user.CreateOrGetUser(name)
+	u, err := user.CreateOrGetUser(name)
 	if err != nil {
-		t.Log(err)
+		t.Fatal(err)
 	}
+
+	defer u.Delete()
+
+	if !utils.FileExists("/home/" + name) {
+		t.Fatal("for some reason, home folder for", name, "does not exist")
+	}
+
 	targetBinaryPath := path.Join("/home", name, "main")
 	if utils.FileExists(targetBinaryPath) {
 		os.Remove(targetBinaryPath)
@@ -38,7 +45,7 @@ func DescribeBinaryStatus(name string) bool {
 	filename := path.Join("/home", name, "main")
 
 	if !utils.FileExists(filename) {
-		fmt.Println(filename, "does not exist")
+		fmt.Println(filename, "does not exist and it should")
 		return false
 	}
 

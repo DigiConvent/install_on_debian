@@ -1,7 +1,6 @@
 package binary
 
 import (
-	"fmt"
 	"os"
 	"path"
 
@@ -30,21 +29,9 @@ func (b *Binary) uri() string {
 func (b *Binary) HardLinkToHome() error {
 	target := path.Join("/home", b.name, "main")
 	if utils.FileExists(target) {
-		original, err := os.Stat(b.uri())
+		err := os.Remove(target)
 		if err != nil {
 			return err
-		}
-
-		hardLink, err := os.Stat(target)
-		if err != nil {
-			return err
-		}
-		isSameFile := os.SameFile(original, hardLink)
-		if isSameFile {
-			err = os.Remove(target)
-			if err != nil {
-				fmt.Println(err)
-			}
 		}
 		return b.HardLinkToHome()
 	}

@@ -20,8 +20,8 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=` + binaryPath(name) + ` --run
-Restart=always
+ExecStart=` + binaryPath(name) + `
+Restart=on-failure
 User=` + name + `
 Group=` + name + `
 StandardOutput=journal

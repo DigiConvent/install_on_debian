@@ -6,32 +6,42 @@ import (
 	user "github.com/DigiConvent/install_on_debian/user"
 )
 
-func InstallThisBinary(name string) error {
+func InstallThisBinary(name string) (systemctl.StartedService, error) {
 	u, err := user.CreateOrGetUser(name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	sysCtl, err := systemctl.Get(name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	bin := binary.New(name)
 	err = bin.HardLinkToHome()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	sysCtl.User = u
-	if sysCtl.IsInstalled() {
-		return nil
+	var startedService systemctl.StartedService
+	if !sysCtl.IsInstalled() {
+		idleService, err := sysCtl.Install("")
+		if err != nil {
+			return nil, err
+		}
+		startedService, err = idleService.Start()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		startedService, err = sysCtl.Start()
+		if err != nil {
+			return nil, err
+		}
 	}
-	_, err = sysCtl.Install("")
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return startedService, nil
 }
 
 func UninstallThisBinary(name string) error {

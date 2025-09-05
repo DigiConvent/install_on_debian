@@ -70,7 +70,7 @@ type ServiceStatus struct {
 
 func (s *SystemCtl) refreshStatus() (*ServiceStatus, error) {
 	sStatus := s.status
-	output, err := utils.Execute("show " + s.serviceName + ".service")
+	output, err := utils.Execute("systemctl show " + s.serviceName + ".service")
 	if err != nil {
 		return nil, errors.New(output + ": " + err.Error())
 	}
