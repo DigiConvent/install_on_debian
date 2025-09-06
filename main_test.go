@@ -56,10 +56,12 @@ func TestInstallOnDebian(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = idleService.Uninstall()
+	uninstalledService, err := idleService.Uninstall()
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	uninstalledService.DeleteAccount()
 }
 
 func Logs(name string, numLines int) {

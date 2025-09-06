@@ -14,6 +14,7 @@ type SystemCtlI interface {
 	Uninstall() (UninstalledService, error)
 	Start() (StartedService, error)
 	Stop() (IdleService, error)
+	DeleteAccount() error
 
 	IsRunning() bool
 	IsInstalled() bool
@@ -24,7 +25,9 @@ type SystemCtlI interface {
 
 type UninstalledService interface {
 	Install(unitFile string) (IdleService, error)
+	DeleteAccount() error
 }
+
 type StartedService interface {
 	Stop() (IdleService, error)
 }
@@ -37,6 +40,10 @@ type SystemCtl struct {
 	serviceName string
 	User        *user.OsUserAccount
 	status      *ServiceStatus
+}
+
+func (s *SystemCtl) DeleteAccount() error {
+	return s.User.Delete()
 }
 
 func (s *SystemCtl) reload() error {
